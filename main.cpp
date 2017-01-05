@@ -178,105 +178,325 @@
 
 //下面是新程序 用于测试字符串压缩
 //所以说要sum>3因为必须要有一个“引导符” 所以说这样毫无意义……倒不如直接用缩位的方法
+//#include <stdio.h>
+//#include <math.h>
+//#include <stdlib.h>
+//#include <string.h>
+//#define MAXZBUF  4096    //这是压缩缓冲区大小
+//#define MAXUBUF  32768    //这是解压缓冲区大小
+//int satoi(const char *str,int *nextptr,int start=0)
+//{
+//    //以任何非数字为结束
+//    //nextptr为‘后的位置
+//    //不考虑负数
+//    int sum=0;
+//    *nextptr=start;
+//    for(int i=start;str[i]<='9'&&str[i]>='0';++i,(*nextptr)++)
+//    {
+//        sum*=10;
+//        sum+=str[i]-'0';
+//    }
+//    return sum;
+//}
+
+//char *zip(const char *str)
+//{
+//    char *buf=(char *)malloc(sizeof(char)*4096);//通用缓冲区
+//    char *ret=(char *)calloc(MAXZBUF,sizeof(char));//用个calloc增加多样性……
+//    char *retptr=ret;
+//    int sum=0;//同字符计数器
+//    char c=str[0];//当前字符 初始化为第一个字符
+//    retptr+=sprintf(retptr,"%c",c);//先输出第一个字符 创造初始化环境
+//    for(int j=0;;++j)
+//    {
+//        if(str[j]==c) sum++;
+//        else
+//        {
+//            //遇到不同字符
+//            if(sum>3)
+//            {
+//                retptr+=sprintf(retptr,":%s'",itoa(sum,buf,10));
+//            }
+//            else
+//            {
+//                if(sum>1) for(int k=0;k<sum-1;++k) retptr+=sprintf(retptr,"%c",c);//填充sum-1个 加上下面一个正好sum个
+//            }
+//            //标准初始化过程：记录新字符 输出要计数的字符 然后初始化计数器为1
+//            c=str[j];
+//            retptr+=sprintf(retptr,"%c",c);
+//            sum=1;
+//            if(str[j]==0) break;//这里放跳出语句 的意思为 当遇到不同字符(\0总是不同字符)时处理 处理完了发现是结束符就跳出
+//        }
+//    }
+//    free(buf);
+//    return ret;
+//}
+//char *unzip(const char *zstr)
+//{
+//    //解压程序
+//    char *ret=(char *)calloc(MAXUBUF,sizeof(char));
+//    int rtop=0;//ret的当前空位指针
+//    for(int i=0;zstr[i]!=0;)
+//    {
+////        if(zstr[i]=='\'') {i++;continue;} //跳过
+//        char c=zstr[i];
+//        ret[rtop++]=c;
+//        i++;//跳到后面的数字上去
+////        if(c<='9'&&c>='0')
+////        {
+//            if(zstr[i]==':') i++;//如果后面的符号是冒号就跳到数字上
+//            else continue;//否则继续
+////        }
+////        if(zstr[i]=='\'') {i++;continue;}//如果为’的话就继续下一个
+//        if(!(zstr[i]<='9'&&zstr[i]>='0'))
+//        {
+//            //如果不在数字范围内 说明要继续下一个
+//            continue;
+//        }
+//        //否则这里读取个数
+//        int sum=satoi(zstr,&i,i);//读取结束后satoi会直接把i设置为‘处
+//        i++;//跳过数字后的单引号
+//        for(int j=1;j<sum;++j)
+//        {
+//            ret[rtop++]=c;
+//        }
+//        ret[rtop]=0;//暂时把顶设置为结束
+//    }
+//    return ret;
+//}
+
+//int main(int argc,char **argv)
+//{
+//    if(argc>1)
+//    {
+//        for(int i=1;i<argc;++i)
+//        {
+//            char *zipstr=zip(argv[i]);
+//            char *unziped=unzip(zipstr);
+//            printf("ziped:%s\nraw  :%s\nunzip:%s\n",zipstr,argv[i],unziped);
+//            free(zipstr);
+//            free(unziped);
+//        }
+//    }
+//    getchar();
+//}
+
+
+
 #include <stdio.h>
 #include <math.h>
-#include <stdlib.h>
-#include <string.h>
-#define MAXZBUF  4096    //这是压缩缓冲区大小
-#define MAXUBUF  32768    //这是解压缓冲区大小
-int satoi(const char *str,int *nextptr,int start=0)
+#include <thread>
+#include <fstream>
+int f(int a)
 {
-    //以任何非数字为结束
-    //nextptr为‘后的位置
-    //不考虑负数
-    int sum=0;
-    *nextptr=start;
-    for(int i=start;str[i]<='9'&&str[i]>='0';++i,(*nextptr)++)
-    {
-        sum*=10;
-        sum+=str[i]-'0';
-    }
-    return sum;
+    int i;
+    for(i=2;i<=sqrt(a);i+=2)
+        if(a%i==0)break;
+    if(i>=sqrt(a))return 1;
+    else return 0;
 }
+// primes[i]是递增的素数序列: 2, 3, 5, 7, ...
+// 更准确地说primes[i]序列包含1->sqrt(n)范围内的所有素数
+bool isPrime(int primes[], int n)
+{
+ if(n < 2) return false;
+ for(int i = 0; primes[i]*primes[i] <= n; ++i)
+  if(n%primes[i] == 0) return false;
+ return true;
+}
+bool isPrime_ml(int n)
+{
+    if(n < 2) return false;
+    if(n == 2) return true;
+    if(n%2 == 0) return false;
+    int foo = (int)sqrt(n);
+    for(int i = 3; i <= foo; i += 2)
+        if(n%i == 0) return false;
+    return true;
+}
+int main(void)
+{
 
-char *zip(const char *str)
-{
-    char *buf=(char *)malloc(sizeof(char)*4096);//通用缓冲区
-    char *ret=(char *)calloc(MAXZBUF,sizeof(char));//用个calloc增加多样性……
-    char *retptr=ret;
-    int sum=0;//同字符计数器
-    char c=str[0];//当前字符 初始化为第一个字符
-    retptr+=sprintf(retptr,"%c",c);//先输出第一个字符 创造初始化环境
-    for(int j=0;;++j)
-    {
-        if(str[j]==c) sum++;
-        else
-        {
-            //遇到不同字符
-            if(sum>3)
-            {
-                retptr+=sprintf(retptr,":%s'",itoa(sum,buf,10));
-            }
-            else
-            {
-                if(sum>1) for(int k=0;k<sum-1;++k) retptr+=sprintf(retptr,"%c",c);//填充sum-1个 加上下面一个正好sum个
-            }
-            //标准初始化过程：记录新字符 输出要计数的字符 然后初始化计数器为1
-            c=str[j];
-            retptr+=sprintf(retptr,"%c",c);
-            sum=1;
-            if(str[j]==0) break;//这里放跳出语句 的意思为 当遇到不同字符(\0总是不同字符)时处理 处理完了发现是结束符就跳出
-        }
-    }
-    free(buf);
-    return ret;
-}
-char *unzip(const char *zstr)
-{
-    //解压程序
-    char *ret=(char *)calloc(MAXUBUF,sizeof(char));
-    int rtop=0;//ret的当前空位指针
-    for(int i=0;zstr[i]!=0;)
-    {
-//        if(zstr[i]=='\'') {i++;continue;} //跳过
-        char c=zstr[i];
-        ret[rtop++]=c;
-        i++;//跳到后面的数字上去
-//        if(c<='9'&&c>='0')
+//    int n,a,i,b;
+//    while(scanf("%d",&n)!=EOF)
+//    {
+//        for(i=3,b=0;i<=n/2;i+=2)
 //        {
-            if(zstr[i]==':') i++;//如果后面的符号是冒号就跳到数字上
-            else continue;//否则继续
+//            if(f(i)==1)
+//            {
+//                a=n-i;
+//                if(f(a)==1)b++;
+//            }
 //        }
-//        if(zstr[i]=='\'') {i++;continue;}//如果为’的话就继续下一个
-        if(!(zstr[i]<='9'&&zstr[i]>='0'))
+//        printf("%d\n",b);
+//    }
+//    return 0;
+
+    auto fun=[](int start,int end,int *nums){
+        int tsum=0;
+        int p=0;
+        for(int i=start;i<end;++i)
         {
-            //如果不在数字范围内 说明要继续下一个
-            continue;
+            if(isPrime_ml(i))
+            {
+                nums[p++]=i;
+                tsum++;
+            }
         }
-        //否则这里读取个数
-        int sum=satoi(zstr,&i,i);//读取结束后satoi会直接把i设置为‘处
-        i++;//跳过数字后的单引号
-        for(int j=1;j<sum;++j)
+        printf("done");
+    };
+
+    int max=pow(2,23);
+    //4线程素数表生成
+    int *nums1=new int[4*1024*1024]{0};//就不信不够
+    int *nums2=new int[4*1024*1024]{0};
+    int *nums3=new int[4*1024*1024]{0};
+    int *nums4=new int[4*1024*1024]{0};
+
+    std::thread th1([&fun,max,nums1](){fun(2,max/4,nums1);});
+    std::thread th2([&fun,max,nums2](){fun(max/4+1,max/4*2,nums2);});
+    std::thread th3([&fun,max,nums3](){fun(max/4*2+1,max/4*3,nums3);});
+    std::thread th4([&fun,max,nums4](){fun(max/4*3+1,max,nums4);});
+    th1.detach();
+    th2.detach();
+    th3.detach();
+    th4.detach();
+    getchar();
+    //写入文件
+    std::ofstream fout;
+    fout.open("table.c");
+    fout<<"int stable[]={";
+    int *nums[]={nums1,nums2,nums3,nums4};
+    int sum=0;
+    for(int i=0;i<4;++i)
+    {
+        int *ns=nums[i];
+        for(int j=0;ns[j]!=0;++j)
         {
-            ret[rtop++]=c;
+            fout<<ns[j];
+            if(!(i==3&&ns[j+1]==0)) fout<<',';
+            sum++;
         }
-        ret[rtop]=0;//暂时把顶设置为结束
-    }
-    return ret;
+        }
+        fout<<"};\n";
+        fout<<"int s_sum="<<sum<<";";
+        fout.close();
+
+    //单线程版本 似乎有些问题
+//    auto fun=[](int start,int end,int *nums){
+//        int tsum=0;
+//        int p=0;
+//        for(int i=start;i<end;++i)
+//        {
+//            if(isPrime(nums,i))
+//            {
+//                nums[p++]=i;
+//                tsum++;
+//            }
+//        }
+//        printf("done");
+//    };
+//    int *nums1=new int[8*1024*1024]{0};
+//    nums1[0]=2;
+//    fun(2,max,nums1);
+//    std::ofstream fout;
+//    fout.open("table.c");
+//    fout<<"int stable[]={";
+//    int *nums[]={nums1};
+//    for(int i=0;i<4;++i)
+//    {
+//        int *ns=nums[i];
+//        for(int j=0;ns[j]!=0;++j)
+//        {
+//            fout<<ns[j];
+//            if(!(i==3&&ns[j+1]==0)) fout<<',';
+//        }
+//    }
+//    fout<<"};";
+//    fout.close();
+    //程序结束不用释放内存
 }
 
-int main(int argc,char **argv)
-{
-    if(argc>1)
-    {
-        for(int i=1;i<argc;++i)
-        {
-            char *zipstr=zip(argv[i]);
-            char *unziped=unzip(zipstr);
-            printf("ziped:%s\nraw  :%s\nunzip:%s\n",zipstr,argv[i],unziped);
-            free(zipstr);
-            free(unziped);
-        }
-    }
-    getchar();
-}
+//#include<iostream>
+//#include <math.h>
+//using namespace std;
+//int main()
+//{int CompositeNumFilterV3(int);
+// int m=pow(2,23),c;
+//// cin>>m;
+// c=CompositeNumFilterV3(m);
+// cout<<c<<endl;
+//return 0;
+//}//求素数的程序
+//int CompositeNumFilterV3(int n)
+//{
+// int i, j;
+// //素数数量统计
+// int count = 0;
+// // 分配素数标记空间，明白+1原因了吧，因为浪费了一个flag[0]
+// char* flag = (char*)malloc( n+1 );
+// // 干嘛用的，请仔细研究下文
+// int mpLen = 2*3*5*7*11*13;
+// char magicPattern[2*3*5*7*11*13]; // 奇怪的代码，why，思考无法代劳，想！
+// for (i=0; i<mpLen; i++)
+// {
+//  magicPattern[i++] = 1;
+//  magicPattern[i++] = 0;
+//  magicPattern[i++] = 0;
+//  magicPattern[i++] = 0;
+//  magicPattern[i++] = 1;
+//  magicPattern[i] = 0;
+// }
+// for (i=4; i<=mpLen; i+=5)
+//  magicPattern[i] = 0;
+// for (i=6; i<=mpLen; i+=7)
+//  magicPattern[i] = 0;
+// for (i=10; i<=mpLen; i+=11)
+//  magicPattern[i] = 0;
+// for (i=12; i<=mpLen; i+=13)
+//  magicPattern[i] = 0;  // 新的初始化方法,将2,3,5,7,11,13的倍数全干掉
+//  // 而且采用memcpy以mpLen长的magicPattern来批量处理
+// int remainder = n%mpLen;
+// char* p = flag+1;
+// char* pstop = p+n-remainder;
+// while (p < pstop)
+// {
+//  memcpy(p, magicPattern, mpLen);
+//  p += mpLen;
+// }
+//  if (remainder > 0)
+//  {
+//   memcpy(p, magicPattern, remainder);
+//  }
+//  flag[2] = 1;
+//  flag[3] = 1;
+//  flag[5] = 1;
+//  flag[7] = 1;
+//  flag[11] = 1;
+//  flag[13] = 1;    // 从17开始filter，因为2,3,5,7,11,13的倍数早被kill了
+//  // 到n/13止的，哈哈，少了好多吧
+//  int stop = n/13;
+//  for (i=17; i <= stop; i++)
+//  {
+//   // i是合数，请歇着吧，因为您的工作早有您的质因子代劳了
+//  if (0 == flag[i]) continue;
+//  // 从i的17倍开始过滤
+//  int step = i*2;
+//  for (j=i*17; j <= n; j+=step)
+//  {
+//  flag[j] = 0;
+//  }
+//  }
+
+//  // 统计素数个数
+//  for (i=2; i<=n; i++)
+//  {
+//   if (flag[i]) count++;
+//  }
+
+//  // 因输出费时，且和算法核心相关不大，故略
+//  // 释放内存，别忘了传说中的内存泄漏
+//  free(flag);
+
+//  return count;
+//}
