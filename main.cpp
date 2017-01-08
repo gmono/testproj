@@ -283,104 +283,104 @@
 
 
 
-#include <stdio.h>
-#include <math.h>
-#include <thread>
-#include <fstream>
-int f(int a)
-{
-    int i;
-    for(i=2;i<=sqrt(a);i+=2)
-        if(a%i==0)break;
-    if(i>=sqrt(a))return 1;
-    else return 0;
-}
-// primes[i]是递增的素数序列: 2, 3, 5, 7, ...
-// 更准确地说primes[i]序列包含1->sqrt(n)范围内的所有素数
-bool isPrime(int primes[], int n)
-{
- if(n < 2) return false;
- for(int i = 0; primes[i]*primes[i] <= n; ++i)
-  if(n%primes[i] == 0) return false;
- return true;
-}
-bool isPrime_ml(int n)
-{
-    if(n < 2) return false;
-    if(n == 2) return true;
-    if(n%2 == 0) return false;
-    int foo = (int)sqrt(n);
-    for(int i = 3; i <= foo; i += 2)
-        if(n%i == 0) return false;
-    return true;
-}
-int main(void)
-{
+//#include <stdio.h>
+//#include <math.h>
+//#include <thread>
+//#include <fstream>
+//int f(int a)
+//{
+//    int i;
+//    for(i=2;i<=sqrt(a);i+=2)
+//        if(a%i==0)break;
+//    if(i>=sqrt(a))return 1;
+//    else return 0;
+//}
+//// primes[i]是递增的素数序列: 2, 3, 5, 7, ...
+//// 更准确地说primes[i]序列包含1->sqrt(n)范围内的所有素数
+//bool isPrime(int primes[], int n)
+//{
+// if(n < 2) return false;
+// for(int i = 0; primes[i]*primes[i] <= n; ++i)
+//  if(n%primes[i] == 0) return false;
+// return true;
+//}
+//bool isPrime_ml(int n)
+//{
+//    if(n < 2) return false;
+//    if(n == 2) return true;
+//    if(n%2 == 0) return false;
+//    int foo = (int)sqrt(n);
+//    for(int i = 3; i <= foo; i += 2)
+//        if(n%i == 0) return false;
+//    return true;
+//}
+//int main(void)
+//{
 
-//    int n,a,i,b;
-//    while(scanf("%d",&n)!=EOF)
-//    {
-//        for(i=3,b=0;i<=n/2;i+=2)
+////    int n,a,i,b;
+////    while(scanf("%d",&n)!=EOF)
+////    {
+////        for(i=3,b=0;i<=n/2;i+=2)
+////        {
+////            if(f(i)==1)
+////            {
+////                a=n-i;
+////                if(f(a)==1)b++;
+////            }
+////        }
+////        printf("%d\n",b);
+////    }
+////    return 0;
+
+//    auto fun=[](int start,int end,int *nums){
+//        int tsum=0;
+//        int p=0;
+//        for(int i=start;i<end;++i)
 //        {
-//            if(f(i)==1)
+//            if(isPrime_ml(i))
 //            {
-//                a=n-i;
-//                if(f(a)==1)b++;
+//                nums[p++]=i;
+//                tsum++;
 //            }
 //        }
-//        printf("%d\n",b);
-//    }
-//    return 0;
+//        printf("done");
+//    };
 
-    auto fun=[](int start,int end,int *nums){
-        int tsum=0;
-        int p=0;
-        for(int i=start;i<end;++i)
-        {
-            if(isPrime_ml(i))
-            {
-                nums[p++]=i;
-                tsum++;
-            }
-        }
-        printf("done");
-    };
+//    int max=pow(2,23);
+//    //4线程素数表生成
+//    int *nums1=new int[4*1024*1024]{0};//就不信不够
+//    int *nums2=new int[4*1024*1024]{0};
+//    int *nums3=new int[4*1024*1024]{0};
+//    int *nums4=new int[4*1024*1024]{0};
 
-    int max=pow(2,23);
-    //4线程素数表生成
-    int *nums1=new int[4*1024*1024]{0};//就不信不够
-    int *nums2=new int[4*1024*1024]{0};
-    int *nums3=new int[4*1024*1024]{0};
-    int *nums4=new int[4*1024*1024]{0};
-
-    std::thread th1([&fun,max,nums1](){fun(2,max/4,nums1);});
-    std::thread th2([&fun,max,nums2](){fun(max/4+1,max/4*2,nums2);});
-    std::thread th3([&fun,max,nums3](){fun(max/4*2+1,max/4*3,nums3);});
-    std::thread th4([&fun,max,nums4](){fun(max/4*3+1,max,nums4);});
-    th1.detach();
-    th2.detach();
-    th3.detach();
-    th4.detach();
-    getchar();
-    //写入文件
-    std::ofstream fout;
-    fout.open("table.c");
-    fout<<"int stable[]={";
-    int *nums[]={nums1,nums2,nums3,nums4};
-    int sum=0;
-    for(int i=0;i<4;++i)
-    {
-        int *ns=nums[i];
-        for(int j=0;ns[j]!=0;++j)
-        {
-            fout<<ns[j];
-            if(!(i==3&&ns[j+1]==0)) fout<<',';
-            sum++;
-        }
-        }
-        fout<<"};\n";
-        fout<<"int s_sum="<<sum<<";";
-        fout.close();
+//    std::thread th1([&fun,max,nums1](){fun(2,max/4,nums1);});
+//    std::thread th2([&fun,max,nums2](){fun(max/4+1,max/4*2,nums2);});
+//    std::thread th3([&fun,max,nums3](){fun(max/4*2+1,max/4*3,nums3);});
+//    std::thread th4([&fun,max,nums4](){fun(max/4*3+1,max,nums4);});
+//    th1.detach();
+//    th2.detach();
+//    th3.detach();
+//    th4.detach();
+//    getchar();
+//    //写入文件
+//    std::ofstream fout;
+//    fout.open("table.c");
+//    fout<<"int stable[]={";
+//    int *nums[]={nums1,nums2,nums3,nums4};
+//    int sum=0;
+//    for(int i=0;i<4;++i)
+//    {
+//        int *ns=nums[i];
+//        for(int j=0;ns[j]!=0;++j)
+//        {
+//            fout<<ns[j];
+//            if(!(i==3&&ns[j+1]==0)) fout<<',';
+//            sum++;
+//        }
+//        }
+//        fout<<"};\n";
+//        fout<<"int s_sum="<<sum<<";";
+//        fout.close();
 
     //单线程版本 似乎有些问题
 //    auto fun=[](int start,int end,int *nums){
@@ -415,7 +415,7 @@ int main(void)
 //    fout<<"};";
 //    fout.close();
     //程序结束不用释放内存
-}
+//}
 
 //#include<iostream>
 //#include <math.h>
@@ -500,3 +500,80 @@ int main(void)
 
 //  return count;
 //}
+
+//C语言读取
+#include <stdio.h>
+#include <stdbool.h>
+int read(FILE *f)
+{
+    //这里f的文件指针应该指向数字
+    bool isf=false;//负数标志
+    char c=0;
+    if((c=fgetc(f))=='-') {isf=true;c=fgetc(f);}//自动seek
+    int sum=0;
+    for(;c>='0'&&c<='9';c=fgetc(f))
+    {
+        sum=sum*10+(c-'0');
+    }
+    //文件指针指向 第一个非空格的后面 根据此函数的逻辑语义
+    //应该在数字后面结束因此减一 如果直接在main里写代码
+    //就不用这么麻烦
+    fseek(f,-1,SEEK_CUR);
+    if(isf) sum=-sum;
+    return sum;
+}
+
+int main()
+{
+    char buf[4096];
+    FILE *write=fopen("test.txt","wt");
+    int raw[]={1,2,3,4,5,6,1111,2222,123,124};
+    int len=sizeof(raw)/sizeof(int);
+    for(int i=0;i<len;++i) fprintf(write,"%d ",raw[i]);
+    fclose(write);
+
+    FILE *rfile=fopen("test.txt","rt");
+    int nums[4096]={0};
+//    FILE *f=rfile;
+//    int nums[4096]={0};
+//    int nptr=0;
+//    bool isin=false;
+//    for(char c=fgetc(f);c!=EOF;c=fgetc(f))
+//    {
+//        if(c==' ')
+//        {
+//            if(!isin)
+//                continue;
+//            else
+//            {
+//                nptr++;
+//                isin=false;
+//            }
+//        }
+//        if(c>='0'&&c<='9')
+//        {
+//            if(!isin) isin=true;
+//            nums[nptr]*=10;
+//            nums[nptr]+=c-'0';
+//        }
+//    }
+//    int sum=0;
+//    char c=fgetc(rfile);
+//    for(;c!=EOF&&c!=0;c=fgetc(rfile))
+//    {
+
+//        if(c==' '||c=='\t') continue;
+//        fseek(rfile,-1,SEEK_CUR);//文件指针复位
+//        int num=read(rfile);//结束后指向数字最后一个字符后面
+//        nums[sum++]=num;
+//    }
+//    int sum=nptr;
+
+    //以上注释部分为不分割结构的版本
+    for(int i=0;i<sum;++i)
+    {
+        printf("%d\n",nums[i]);
+    }
+    fclose(rfile);
+    getchar();
+}
