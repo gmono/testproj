@@ -678,11 +678,12 @@ void loadfile(FILE *file,bool isfromfile)
     {
         //尚未实现
     }
+    Node_Zip(head); //采用压缩模式
 }
 const char *search(const char *str)
 {
     //搜索函数
-    const char *val=Node_Search(head,str);
+    const char *val=Node_ZSearch(head,str);
     return val;
 }
 
@@ -737,3 +738,14 @@ int main()
     }
 }
 
+//int main()
+//{
+//    //单独测试zip系列函数
+//    Node test={'h',NULL,NULL};
+//    Node *data[]={&test,&test,&test,0,0,0,&test,0,&test};
+//    Node **testdata=new Node*[256]{NULL};
+//    memcpy(testdata,data,sizeof(Node *)*9);
+//    zip_zip((byte **)(&testdata));
+//    Node *ts=zip_get((byte *)testdata,0);
+//    Node *ts2=zip_get((byte *)testdata,3);
+//}
