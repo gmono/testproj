@@ -652,6 +652,11 @@ inline Word GetWord(const char *str,int *sptr)
     return ret;
 }
 Node *head=NULL;
+#include <map>
+#include <string>
+#include <unordered_map>
+#define mymap std::unordered_map
+mymap<std::string,const char *> triemap;
 ///
 /// \brief loadfile
 /// \param path 文件路径
@@ -671,20 +676,28 @@ void loadfile(FILE *file,bool isfromfile)
             if(c==' '||c=='\t'||c=='\r'||c=='\n') continue;//这里忽略多余空白
             fseek(file,-1,SEEK_CUR);
             Word w=GetWordFromFile(file);
-            Node_Insert(head,w.english,w.chinese,false);//不允许替换
+//            Node_Insert(head,w.english,w.chinese,false);//不允许替换
+            //stl实现测试
+            triemap.insert(std::pair<std::string,const char *>(w.english,w.chinese));
         }
     }
     else
     {
         //尚未实现
     }
-    Node_Zip(head); //采用压缩模式
+//    Node_Zip(head); //采用压缩模式
 }
 const char *search(const char *str)
 {
     //搜索函数
     const char *val=Node_ZSearch(head,str);
     return val;
+}
+const char *stlsearch(std::string &str)
+{
+    auto ptr=triemap.find(str);
+    if(ptr!=triemap.end()) return ptr->second;
+    return NULL;
 }
 
 
@@ -711,11 +724,16 @@ int main()
     scanf("%s",buf);
     int len=strlen(buf);
     char *test=(char *)malloc(len+1);
+    //stl测试
+    std::string teststr=test;
+    //
     strcpy(test,buf);
     clock_t tests=clock();
     for(int i=0;i<100000000;++i)
     {
-        search(test);
+//        search(test);
+        //stl测试
+        stlsearch(teststr);
     }
     clock_t teste=clock();
     printf("用时：%ld\n",teste-tests);
@@ -724,7 +742,11 @@ int main()
         //查询循环
         printf("请输入查询的内容：");
         scanf("%s",buf);
-        const char *str=search(buf);
+//        const char *str=search(buf);
+        //stl测试
+        std::string tstr=buf;
+        const char *str=stlsearch(tstr);
+        //
         if(str!=NULL)
         {
             //输出
@@ -749,3 +771,4 @@ int main()
 //    Node *ts=zip_get((byte *)testdata,0);
 //    Node *ts2=zip_get((byte *)testdata,3);
 //}
+
